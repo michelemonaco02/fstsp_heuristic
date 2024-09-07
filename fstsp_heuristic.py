@@ -133,7 +133,7 @@ def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distanc
 
 
 
-def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,t,maxSavings):
+def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:list,t,maxSavings):
 
     i = best_insertion[0]
     j = best_insertion[1]
@@ -157,25 +157,34 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,
         #NON CREDO SIA GIUSTO. Inoltre, voglio che l'aggiornamento dei truckSubRoutes sia in modo tale che le subroutes siano in ordine
         for subroute in truckSubRoutes:
             if i in subroute[0] and k in subroute[0]:
+                # Salvo l'indice della subroute in truckSubRoutes
+                index_subroute = truckSubRoutes.index(subroute)
                 index_i = subroute[0].index(i)
                 index_k = subroute[0].index(k)
 
-                subroute_before_i = subroute[0][:index_i + 1]
-                subroute_i_k = subroute[0][index_i:index_k + 1]
-                subroute_after_k = subroute[0][index_k:]
+                subroute_before_i = subroute[0][:index_i + 1]  # Prima parte fino a i incluso
+                subroute_i_k = subroute[0][index_i:index_k + 1]  # Parte tra i e k inclusi
+                subroute_after_k = subroute[0][index_k:]  # Parte dopo k
 
+                # Rimuovo la subroute originale
                 truckSubRoutes.remove(subroute)
 
-                #tengo conto del caso in cui i e k sono il nodo iniziale o finale
+                # Inserisco direttamente nella posizione corretta usando index_subroute e lo incremento dopo ogni insert
+
                 if len(subroute_before_i) > 1:
-                    truckSubRoutes.append((subroute_before_i, -1))
+                    truckSubRoutes.insert(index_subroute, (subroute_before_i, -1))
+                    index_subroute += 1  # Aggiorno l'indice per la prossima insert
+
                 if len(subroute_i_k) > 1:
-                    truckSubRoutes.append((subroute_i_k, j))
+                    truckSubRoutes.insert(index_subroute, (subroute_i_k, j))
+                    index_subroute += 1  # Aggiorno l'indice per la prossima insert
+
                 if len(subroute_after_k) > 1:
-                    truckSubRoutes.append((subroute_after_k, -1))
+                    truckSubRoutes.insert(index_subroute, (subroute_after_k, -1))
 
                 break
-        
+
+            
         #elimino i nodi i j k da C_prime
         for node in [i, j, k]:
             if node in C_prime:
