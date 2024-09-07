@@ -55,8 +55,6 @@ def analyze_drone_speed_impact_on_fstsp():
     distances_truck = load_distances_small(truck=True)
     distances_uav = load_distances_small(truck=False)
 
-    # Risolvi il problema TSP con una euristica standard (es: nearest neighbor)
-    truck_route, truck_times = solveTSP(num_clients, distances_truck, heuristic='nearest_neighbor')
     
     drone_speeds = [32]  # km/h
 

@@ -152,7 +152,6 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         for subroute_with_flag in truckSubRoutes:
             if j in subroute_with_flag[0]:
                 subroute_with_flag[0].remove(j)
-                index_subroute_in = truckSubRoutes.index(subroute_with_flag)
                 break
         
 
@@ -160,30 +159,25 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         #per prima cosa, trovo la subroute con i e k, poi la elimino e aggiorno
         #NON CREDO SIA GIUSTO. Inoltre, voglio che l'aggiornamento dei truckSubRoutes sia in modo tale che le subroutes siano in ordine
 
-        #mi salvo index_suboroute_before_i,index_subroute_i_k,index_subroute_after_k,index_subroute_fin
-        index_subroute_before_i = None
-        index_subroute_i_k = None
-        index_subroute_after_k = None
-        index_subroute_fin = None
-
 
         for subroute in truckSubRoutes:
             if i in subroute[0] and k in subroute[0]:
                 # Salvo l'indice della subroute in truckSubRoutes
                 index_subroute = truckSubRoutes.index(subroute)
-                index_subroute_fin = index_subroute
+
                 index_i = subroute[0].index(i)
                 index_k = subroute[0].index(k)
 
                 subroute_before_i = subroute[0][:index_i + 1]  # Prima parte fino a i incluso
                 subroute_i_k = subroute[0][index_i:index_k + 1]  # Parte tra i e k inclusi
                 subroute_after_k = subroute[0][index_k:]  # Parte dopo k
+                print(f"[PERFORME UPDATE]: Subroute before i: {subroute_before_i},subroute_i_k : {subroute_i_k},subroute_after_k:{subroute_after_k}...")
+                
 
                 # Rimuovo la subroute originale
                 truckSubRoutes.remove(subroute)
 
                 # Inserisco direttamente nella posizione corretta usando index_subroute e lo incremento dopo ogni insert
-                """"
                 if len(subroute_before_i) > 1:
                     truckSubRoutes.insert(index_subroute, (subroute_before_i, -1))
                     index_subroute += 1  # Aggiorno l'indice per la prossima insert
@@ -196,30 +190,15 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
                     truckSubRoutes.insert(index_subroute, (subroute_after_k, -1))
 
                 break
-                """
-                #per evitare complicazioni, faccio si che possano esserci subroutes con un solo elemento
-                truckSubRoutes.insert(index_subroute_fin, (subroute_before_i, -1))
-                index_subroute_before_i = index_subroute
-                index_subroute += 1  # Aggiorno l'indice per la prossima insert
 
-
-                truckSubRoutes.insert(index_subroute, (subroute_i_k, j))
-                index_subroute_i_k = index_subroute
-                index_subroute += 1  # Aggiorno l'indice per la prossima insert
-
-
-                truckSubRoutes.insert(index_subroute, (subroute_after_k, -1))
-                index_subroute_after_k = index_subroute
-
-                break
             
         #elimino i nodi i j k da C_prime
         for node in [i, j, k]:
             if node in C_prime:
                 C_prime.remove(node)
+        
+        print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
 
-        utilities.updateArrivalTimesServedByUAV(truckSubRoutes,t,maxSavings,
-                                                    index_subroute_before_i,index_subroute_i_k,index_subroute_after_k,index_subroute_in,index_subroute_fin,s_l,savings)
 
         print(f"[PERFORME UPDATE]: t after update:")
         utilities.print_times_in_order(t)
@@ -242,7 +221,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         truckRoute.insert(index_i + 1, j)
     
 
-    print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
+        print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
 
     
     #come aggiornare t?
@@ -257,7 +236,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
 def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, truck_speed, drone_speed, s_l, s_r, e):
     
     #t deve essere un dizionario
-    truckRoute, t = solveTSP(len(C), distances_truck)
+    truckRoute, t = solveTSP(len(C), distances_truck,truck_speed)
     print(f"[MAIN]: Truckroute after TSP: {truckRoute}")
     print(f"[MAIN]: t after TSP: {t}")
     truckSubRoutes = [(copy.deepcopy(truckRoute),-1)]

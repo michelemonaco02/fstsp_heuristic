@@ -1,4 +1,4 @@
-def nearest_neighbor(num_clients, distances):
+def nearest_neighbor(num_clients, distances, truck_speed):
     unvisited = list(range(1, num_clients + 1))
     route = [0]  # Start at the depot
     current = 0
@@ -9,8 +9,9 @@ def nearest_neighbor(num_clients, distances):
         # Trova il nodo più vicino
         nearest = min(unvisited, key=lambda x: distances[current][x])
         
-        # Aggiorna il tempo di arrivo per il nodo più vicino
-        current_time += distances[current][nearest]
+        # Calcola il tempo di arrivo (distanza / velocità del camion)
+        travel_time = distances[current][nearest] / truck_speed
+        current_time += travel_time
         times[nearest] = current_time
         
         # Aggiorna il percorso e il nodo corrente
@@ -20,13 +21,14 @@ def nearest_neighbor(num_clients, distances):
 
     # Ritorno al deposito
     route.append(0)
-    current_time += distances[current][0]
+    travel_time = distances[current][0] / truck_speed  # Tempo per ritornare al deposito
+    current_time += travel_time
     times[0] = current_time  # Aggiorna il tempo di ritorno al deposito
 
     return route, times
 
-def solveTSP(num_clients, distances, heuristic='nearest_neighbor'):
+def solveTSP(num_clients, distances, truck_speed, heuristic='nearest_neighbor'):
     if heuristic == 'nearest_neighbor':
-        return nearest_neighbor(num_clients, distances)
+        return nearest_neighbor(num_clients, distances, truck_speed)
     else:
         raise ValueError(f"Unsupported heuristic: {heuristic}")
