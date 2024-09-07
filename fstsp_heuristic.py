@@ -163,7 +163,9 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         for subroute in truckSubRoutes:
             if i in subroute[0] and k in subroute[0]:
                 # Salvo l'indice della subroute in truckSubRoutes
+                
                 index_subroute = truckSubRoutes.index(subroute)
+                print(f"index subroute before: {index_subroute}")
 
                 index_i = subroute[0].index(i)
                 index_k = subroute[0].index(k)
@@ -188,6 +190,8 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
 
                 if len(subroute_after_k) > 1:
                     truckSubRoutes.insert(index_subroute, (subroute_after_k, -1))
+                
+                index_subroute -= 1
 
                 break
 
@@ -199,6 +203,10 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         
         print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
 
+        print(f"index subroute: {index_subroute}")
+        for index in range(index_subroute,len(truckSubRoutes)):
+            for i in range(1,len(truckSubRoutes[index][0])):
+                t[truckSubRoutes[index][0][i]] -= maxSavings
 
         print(f"[PERFORME UPDATE]: t after update:")
         utilities.print_times_in_order(t)
