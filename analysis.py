@@ -87,18 +87,20 @@ def analyze_drone_speed_impact_on_fstsp():
         # Print the captured output
         print(output)
 
-        # Extract the final truck route from the output
+        # Extract the initial truck route
         initial_route_line = [line for line in output.split('\n') if "[MAIN]: Truckroute after TSP:" in line][0]
         initial_truck_route = eval(initial_route_line.split(": ")[-1])
 
+        # Extract the final truck route
         final_route_line = [line for line in output.split('\n') if "[MAIN]: Truckroute:" in line][-1]
         final_truck_route = eval(final_route_line.split(": ")[-1])
 
-        improvement_line = [line for line in output.split('\n') if "[MAIN]: Ho trovato un miglioramento" in line][-1]
-        drone_route = eval(improvement_line.split("(")[1].split(")")[0])
+        # Extract all drone routes
+        improvement_lines = [line for line in output.split('\n') if "[MAIN]: Ho trovato un miglioramento" in line]
+        drone_routes = [eval(line.split("(")[1].split(")")[0]) for line in improvement_lines]
 
         # Visualize the solution
-        visualize_fstsp(clients, depot, initial_truck_route, final_truck_route, drone_route)
+        visualize_fstsp(clients, depot, initial_truck_route, final_truck_route, drone_routes)
 
         print(f"Finished testing with drone speed: {drone_speed} km/h\n")
 
