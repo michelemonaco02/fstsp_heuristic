@@ -1,6 +1,6 @@
 from solveTSP import solveTSP
 import utilities
-
+from time import sleep
 
 def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,distances_uav,drone_speed,s_r):
     # This function calculates the savings achieved by removing some customer j from the truck’s route.
@@ -42,6 +42,7 @@ def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,d
         tau_j_prime_b_uav = distances_uav[j_prime][b] / drone_speed
 
         savings = min(savings, t_prime_b - (t[a] + tau_a_j_prime_uav + tau_j_prime_b_uav + s_r))
+    
 
     return savings
 
@@ -53,6 +54,7 @@ def is_UAV_associated(subroute_with_flag):
 def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,truck_speed,savings,e):
     #Find a, the first node in the truck’s subroute.
     #Find b, the last node in the truck’s subroute.
+
     subroute = subroute_with_flag[0]
     a = subroute_with_flag[0]
     b = subroute_with_flag[-1]
@@ -72,6 +74,7 @@ def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,
 
             cost  =tau_i_j + tau_j_k - tau_i_k
 
+
             if cost < savings:
                 # Can the UAV assigned to this subroute still feasibly fly?
                 if (t[b] - t[a] + cost) <= e:
@@ -82,11 +85,13 @@ def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,
                         maxSavings = savings - cost
 
 
+
     return best_insertion
 
 def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distances_uav,drone_speed,e,savings,s_l,s_r):
     # This truck subroute is not associated with a UAV visit
     # Try to use the UAV to visit j
+
     subroute = subroute_with_flag[0]
     best_insertion = None
 
@@ -114,11 +119,12 @@ def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distanc
                    
                     #cost = max {0,max{(t'[k]-t[i] + s_l + s_r,(tau_i,j)' + (tau_j,k)' + s_l + s_r} - (t'[k] - t[i])}
                     cost = max(0, max((t_prime_k - t[i]) + s_l + s_r, tau_i_j_uav + tau_j_k_uav + s_l + s_r) - (t_prime_k - t[i]))
-                   
+
                     if savings - cost > maxSavings:  # Changed < to > as we're maximizing savings
                         servedByUAV = True
                         best_insertion = (i,j,k)
                         maxSavings = savings - cost
+
    
     return best_insertion
 
@@ -208,6 +214,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,
 def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, truck_speed, drone_speed, s_l, s_r, e):
     
     truckRoute, t = solveTSP(len(C), distances_truck)
+    print(f"[MAIN]: Truckroute after TSP: {truckRoute}")
     truckSubRoutes = [(truckRoute,-1)]
     maxSavings = 0
 
@@ -216,7 +223,6 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
         servedByUAV = False
         
         for j in C_prime:
-
             #trovo il risparmio che ottengo togliendo j dalla truckRoute
             savings = calcSavings(j,t,truckRoute,truckSubRoutes,distances_truck,truck_speed,distances_uav,drone_speed,s_r)
             if savings is None:
@@ -239,6 +245,7 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
         #non ci sono miglioramenti, interrompo l'algoritmo
         else:
             break
+    print(f"[MAIN]: Truckroute: {truckRoute}")
 
     
 

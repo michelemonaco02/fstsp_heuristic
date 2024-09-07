@@ -36,8 +36,8 @@ def analyze_drone_speed_impact_on_fstsp():
 
         drone_endurance = float(drone_params['flight time_large baterry']) / 3600  # Convert to hours
         drone_capacity = float(drone_params['drone capacity'])  # kg
-        launch_time = float(drone_params['launch time_100 m'])  # seconds
-        landing_time = float(drone_params['landing time_100m'])  # seconds
+        launch_time = float(drone_params['launch time_100 m']) / 3600 # convert to hours
+        landing_time = float(drone_params['landing time_100m']) / 3600 # convert to hours
         preparation_time = float(drone_params['preparation time before each launch'])  # seconds
         service_time_drone = float(drone_params['service time for drones'])  # seconds for each customer
 
@@ -58,6 +58,7 @@ def analyze_drone_speed_impact_on_fstsp():
                 print(f"\nTesting with {num_clients} clients and drone speed: {drone_speed} km/h")
                 
                 # Parametri per la funzione fstsp_heuristic
+                #devo portare tutto in ore
                 s_l = launch_time
                 s_r = landing_time
                 e = drone_endurance  # Endurance
