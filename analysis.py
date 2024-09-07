@@ -7,36 +7,12 @@ import numpy as np
 from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
-from map_visualizer import visualize_fstsp
+from map_visualizer import visualize_fstsp, generate_coordinates
 
-def generate_coordinates(distances):
-    """
-    Generate 2D coordinates from distance matrix using a simple MDS implementation
-    """
-    n = distances.shape[0]
-    
-    # Double center the squared distances
-    H = np.eye(n) - np.ones((n, n)) / n
-    B = -0.5 * H.dot(distances**2).dot(H)
-    
-    # Eigendecomposition
-    eigvals, eigvecs = np.linalg.eigh(B)
-    
-    # Sort eigenvalues in descending order
-    idx = np.argsort(eigvals)[::-1]
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:, idx]
-    
-    # Use the top 2 eigenvectors
-    return eigvecs[:, :2] * np.sqrt(eigvals[:2])
-
-def analyze_drone_speed_impact_on_fstsp():
+def analyze_drone_speed_impact_on_fstsp(plotting=False, drone_speeds=[32]):
     base_path = 'Data_and_data-description/TELIKA DATA/'
     
     num_clients = 10  # Fixed number of clients
-
-    # Range di velocità del drone da testare (in km/h)
-    drone_speeds = [32]  # Potrai aggiungere ulteriori valori di velocità per espandere il test
 
     # Carica i parametri del drone e del van
     drone_params = load_parameters(os.path.join(base_path, 'Values of parameters for drone routing.xlsx'), '40 clients')
@@ -111,10 +87,11 @@ def analyze_drone_speed_impact_on_fstsp():
         improvement_lines = [line for line in output.split('\n') if "[MAIN]: Ho trovato un miglioramento" in line]
         drone_routes = [eval(line.split("(")[1].split(")")[0]) for line in improvement_lines]
 
-        # Visualize the solution
-        visualize_fstsp(clients, depot, initial_truck_route, final_truck_route, drone_routes)
+        # Visualize the solution if plotting is True
+        if plotting:
+            visualize_fstsp(clients, depot, initial_truck_route, final_truck_route, drone_routes)
 
         print(f"Finished testing with drone speed: {drone_speed} km/h\n")
 
 if __name__ == "__main__":
-    analyze_drone_speed_impact_on_fstsp()
+    analyze_drone_speed_impact_on_fstsp(plotting=False, drone_speeds=[32, 40, 48])

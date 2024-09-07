@@ -66,3 +66,24 @@ def plot_route_with_arrows(ax, clients, depot, route, label, color, arrow_style,
                                 label=label)
         ax.add_patch(arrow)
         label = "_nolegend_"  # Only label the first arrow
+
+def generate_coordinates(distances):
+    """
+    Generate 2D coordinates from distance matrix using a simple MDS implementation
+    """
+    n = distances.shape[0]
+    
+    # Double center the squared distances
+    H = np.eye(n) - np.ones((n, n)) / n
+    B = -0.5 * H.dot(distances**2).dot(H)
+    
+    # Eigendecomposition
+    eigvals, eigvecs = np.linalg.eigh(B)
+    
+    # Sort eigenvalues in descending order
+    idx = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[idx]
+    eigvecs = eigvecs[:, idx]
+    
+    # Use the top 2 eigenvectors
+    return eigvecs[:, :2] * np.sqrt(eigvals[:2])
