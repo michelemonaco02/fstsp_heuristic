@@ -43,6 +43,8 @@ def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,d
 
         savings = min(savings, t_prime_b - (t[a] + tau_a_j_prime_uav + tau_j_prime_b_uav + s_r))
 
+    return savings
+
 
 
 def is_UAV_associated(subroute_with_flag):
@@ -86,39 +88,38 @@ def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distanc
     # This truck subroute is not associated with a UAV visit
     # Try to use the UAV to visit j
     subroute = subroute_with_flag[0]
+    best_insertion = None
+
+    # Ensure savings is a number
+    if savings is None:
+        savings = 0  # or some other appropriate default value
 
     #for all (i and k in subroute, such that i precedes k) do
     for i_idx in range(len(subroute) - 1):
         i = subroute[i_idx]
-
         for k_idx in range(i_idx + 1, len(subroute)):
             k = subroute[k_idx]
-
-            #mi assicuro che j sia diverso da i e k 
+            #mi assicuro che j sia diverso da i e k
             if i != j and k != j:
-
                 #if ((tau_i,j)' + (tau_j,k)' <= e) then
                 tau_i_j_uav = distances_uav[i][j] / drone_speed
                 tau_j_k_uav = distances_uav[j][k] / drone_speed
-
-                if (tau_i_j_uav - tau_j_k_uav) <= e:
-                    #QUI SONO MOLTO DUBBIOSO
-                    #Find t’[k], the truck’s arrival time to node k if j were removed from the truck’s route.
+                if (tau_i_j_uav + tau_j_k_uav) <= e:  # Fixed this condition
+                    #Find t'[k], the truck's arrival time to node k if j were removed from the truck's route.
                     #se j si trova dopo k, t[k] rimane uguale
-                    if truckRoute.index(j) < truckRoute.index(k):
+                    if j in truckRoute and truckRoute.index(j) < truckRoute.index(k):
                         t_prime_k = t[k] - savings
                     else:
                         t_prime_k = t[k]
-
-                    
+                   
                     #cost = max {0,max{(t'[k]-t[i] + s_l + s_r,(tau_i,j)' + (tau_j,k)' + s_l + s_r} - (t'[k] - t[i])}
                     cost = max(0, max((t_prime_k - t[i]) + s_l + s_r, tau_i_j_uav + tau_j_k_uav + s_l + s_r) - (t_prime_k - t[i]))
-                    
-                    if savings - cost < maxSavings:
+                   
+                    if savings - cost > maxSavings:  # Changed < to > as we're maximizing savings
                         servedByUAV = True
                         best_insertion = (i,j,k)
                         maxSavings = savings - cost
-    
+   
     return best_insertion
 
 
@@ -204,9 +205,9 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,
 
 
 
-def fstsp_heuristic(C,C_prime,distances_truck,distances_uav,truck_speed,drone_speed,s_l,s_r,e):
+def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, truck_speed, drone_speed, s_l, s_r, e):
     
-    [truckRoute,t] = solveTSP(C)
+    truckRoute, t = solveTSP(len(C), distances_truck)
     truckSubRoutes = [(truckRoute,-1)]
     maxSavings = 0
 
@@ -218,6 +219,8 @@ def fstsp_heuristic(C,C_prime,distances_truck,distances_uav,truck_speed,drone_sp
 
             #trovo il risparmio che ottengo togliendo j dalla truckRoute
             savings = calcSavings(j,t,truckRoute,truckSubRoutes,distances_truck,truck_speed,distances_uav,drone_speed,s_r)
+            if savings is None:
+                savings = 0  # or some other appropriate default value
 
             #itero su ogni subroute e valuto se mi conviene aggiugnerci j
             for subroute_with_flag in truckSubRoutes:

@@ -64,11 +64,19 @@ def analyze_drone_speed_impact_on_fstsp():
 
                 # Poiché al momento la funzione non ritorna nulla, monitoriamo il log per osservare i cambiamenti
                 C = list(range(1, num_clients + 1))  # C = {1, 2, ..., n}
-                C_prime = C  # Al momento C_prime è uguale a C
+                C_prime = C  # For now, assume all customers are UAV-eligible
 
                 fstsp_heuristic(
-                    C, C_prime, distances_truck, distances_uav, 
-                    truck_speed, drone_speed, s_l, s_r, e
+                    num_clients,
+                    C,
+                    C_prime,
+                    distances_truck,
+                    distances_uav,
+                    truck_speed,
+                    drone_speed,
+                    s_l,
+                    s_r,
+                    e
                 )
 
                 print(f"Finished testing with drone speed: {drone_speed} km/h\n")
