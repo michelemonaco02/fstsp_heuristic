@@ -1,9 +1,22 @@
 import os
 import pandas as pd
+import io
+import sys
+from contextlib import redirect_stdout
+import numpy as np
+from sklearn.manifold import MDS
 from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
 from map_visualizer import visualize_fstsp
+
+def generate_coordinates(distances):
+    """
+    Generate 2D coordinates from distance matrix using Multidimensional Scaling
+    """
+    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=6)
+    coordinates = mds.fit_transform(distances)
+    return coordinates
 
 def analyze_drone_speed_impact_on_fstsp():
     base_path = 'Data_and_data-description/TELIKA DATA/'
@@ -32,8 +45,15 @@ def analyze_drone_speed_impact_on_fstsp():
     distances_truck = load_distances(os.path.join(base_path, 'Van_Urban_40.xlsx'))[:num_clients+1, :num_clients+1]
     distances_uav = load_distances(os.path.join(base_path, 'Drone_Urban_40.xlsx'))[:num_clients+1, :num_clients+1]
 
+    # Generate coordinates from distances
+    coordinates = generate_coordinates(distances_uav)
+    
+    # Separate depot and client coordinates
+    depot = coordinates[0]
+    clients = coordinates[1:]
+
     # Risolvi il problema TSP con una euristica standard (es: nearest neighbor)
-    truck_route, truck_times = solveTSP(num_clients, distances_truck, heuristic='nearest_neighbor')
+    initial_truck_route, truck_times = solveTSP(num_clients, distances_truck, heuristic='nearest_neighbor')
     
     for drone_speed in drone_speeds:
         # Esegui l'algoritmo FSTSP con la velocità del drone variabile
@@ -47,25 +67,35 @@ def analyze_drone_speed_impact_on_fstsp():
         C = list(range(1, num_clients + 1))  # C = {1, 2, ..., n}
         C_prime = C  # For now, assume all customers are UAV-eligible
 
-        fstsp_heuristic(
-            num_clients,
-            C,
-            C_prime,
-            distances_truck,
-            distances_uav,
-            truck_speed,
-            drone_speed,
-            s_l,
-            s_r,
-            e
-        )
+        # Capture the output of fstsp_heuristic
+        f = io.StringIO()
+        with redirect_stdout(f):
+            fstsp_heuristic(
+                num_clients,
+                C,
+                C_prime,
+                distances_truck,
+                distances_uav,
+                truck_speed,
+                drone_speed,
+                s_l,
+                s_r,
+                e
+            )
+        output = f.getvalue()
 
-        # Generate client coordinates (for visualization purposes)
-        clients = [(x, y) for x in range(3) for y in range(3) if x * 3 + y < num_clients]
-        depot = (1, 1)  # Place depot in the center
+        # Print the captured output
+        print(output)
+
+        # Extract the final truck route from the output
+        final_route_line = [line for line in output.split('\n') if "[MAIN]: Truckroute:" in line][-1]
+        final_truck_route = eval(final_route_line.split(": ")[-1])
+
+        improvement_line = [line for line in output.split('\n') if "[MAIN]: Ho trovato un miglioramento" in line][-1]
+        drone_route = eval(improvement_line.split("(")[1].split(")")[0])
 
         # Visualize the solution
-        visualize_fstsp(clients, depot, truck_route)
+        visualize_fstsp(clients, depot, initial_truck_route, final_truck_route, drone_route)
 
         print(f"Finished testing with drone speed: {drone_speed} km/h\n")
 
