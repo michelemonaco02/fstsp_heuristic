@@ -65,7 +65,7 @@ def analyze_drone_speed_impact_on_fstsp():
     clients = coordinates[1:]
 
     # Risolvi il problema TSP con una euristica standard (es: nearest neighbor)
-    initial_truck_route, truck_times = solveTSP(num_clients, distances_truck, heuristic='nearest_neighbor')
+    initial_truck_route, truck_times = solveTSP(num_clients, distances_truck, truck_speed, heuristic='nearest_neighbor')
     
     for drone_speed in drone_speeds:
         # Esegui l'algoritmo FSTSP con la velocità del drone variabile
