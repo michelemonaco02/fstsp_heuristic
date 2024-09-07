@@ -4,18 +4,6 @@ import io
 import sys
 from contextlib import redirect_stdout
 import numpy as np
-from sklearn.manifold import MDS
-from data_loader import load_distances, load_parameters
-from fstsp_heuristic import fstsp_heuristic
-from solveTSP import solveTSP
-from map_visualizer import visualize_fstsp
-
-import os
-import pandas as pd
-import io
-import sys
-from contextlib import redirect_stdout
-import numpy as np
 from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
