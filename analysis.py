@@ -21,7 +21,7 @@ def generate_coordinates(distances):
 def analyze_drone_speed_impact_on_fstsp():
     base_path = 'Data_and_data-description/TELIKA DATA/'
     
-    num_clients = 8  # Fixed number of clients
+    num_clients = 10  # Fixed number of clients
 
     # Range di velocità del drone da testare (in km/h)
     drone_speeds = [32]  # Potrai aggiungere ulteriori valori di velocità per espandere il test
@@ -88,6 +88,9 @@ def analyze_drone_speed_impact_on_fstsp():
         print(output)
 
         # Extract the final truck route from the output
+        initial_route_line = [line for line in output.split('\n') if "[MAIN]: Truckroute after TSP:" in line][0]
+        initial_truck_route = eval(initial_route_line.split(": ")[-1])
+
         final_route_line = [line for line in output.split('\n') if "[MAIN]: Truckroute:" in line][-1]
         final_truck_route = eval(final_route_line.split(": ")[-1])
 
