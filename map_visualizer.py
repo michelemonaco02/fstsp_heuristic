@@ -1,8 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle, FancyArrowPatch
+from typing import List, Tuple
 
-def visualize_fstsp(clients, depot, initial_route, final_route, drone_routes):
+def visualize_fstsp(clients: List[Tuple[float, float]], depot: Tuple[float, float], 
+                    initial_route: List[int], final_route: List[int], 
+                    drone_routes: List[Tuple[int, int, int]]) -> None:
+    """
+    Visualize the FSTSP solution including initial and final truck routes, and drone routes.
+    """
     fig, ax = plt.subplots(figsize=(12, 10))
     
     # Identify served and unserved customers
@@ -57,8 +63,13 @@ def visualize_fstsp(clients, depot, initial_route, final_route, drone_routes):
 
     plt.show()
 
-def plot_route_with_arrows(ax, clients, depot, route, label, color, arrow_style, linestyle='-'):
-    """Helper function to plot a route with arrows"""
+def plot_route_with_arrows(ax: plt.Axes, clients: List[Tuple[float, float]], 
+                           depot: Tuple[float, float], route: List[int], 
+                           label: str, color: str, arrow_style: str, 
+                           linestyle: str = '-') -> None:
+    """
+    Helper function to plot a route with arrows on the given axes.
+    """
     coordinates = [depot] + [clients[i-1] for i in route if i != 0] + [depot]
     for start, end in zip(coordinates, coordinates[1:]):
         arrow = FancyArrowPatch(start, end, color=color, arrowstyle=arrow_style, 
@@ -67,9 +78,9 @@ def plot_route_with_arrows(ax, clients, depot, route, label, color, arrow_style,
         ax.add_patch(arrow)
         label = "_nolegend_"  # Only label the first arrow
 
-def generate_coordinates(distances):
+def generate_coordinates(distances: np.ndarray) -> np.ndarray:
     """
-    Generate 2D coordinates from distance matrix using a simple MDS implementation
+    Generate 2D coordinates from distance matrix using a simple MDS implementation.
     """
     n = distances.shape[0]
     
