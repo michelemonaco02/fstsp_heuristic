@@ -4,7 +4,6 @@ import io
 import sys
 from contextlib import redirect_stdout
 import numpy as np
-from sklearn.manifold import MDS
 from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
@@ -12,11 +11,24 @@ from map_visualizer import visualize_fstsp
 
 def generate_coordinates(distances):
     """
-    Generate 2D coordinates from distance matrix using Multidimensional Scaling
+    Generate 2D coordinates from distance matrix using a simple MDS implementation
     """
-    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=6)
-    coordinates = mds.fit_transform(distances)
-    return coordinates
+    n = distances.shape[0]
+    
+    # Double center the squared distances
+    H = np.eye(n) - np.ones((n, n)) / n
+    B = -0.5 * H.dot(distances**2).dot(H)
+    
+    # Eigendecomposition
+    eigvals, eigvecs = np.linalg.eigh(B)
+    
+    # Sort eigenvalues in descending order
+    idx = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[idx]
+    eigvecs = eigvecs[:, idx]
+    
+    # Use the top 2 eigenvectors
+    return eigvecs[:, :2] * np.sqrt(eigvals[:2])
 
 def analyze_drone_speed_impact_on_fstsp():
     base_path = 'Data_and_data-description/TELIKA DATA/'
