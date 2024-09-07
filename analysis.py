@@ -30,16 +30,16 @@ def analyze_drone_speed_impact_on_fstsp():
         drone_params = load_parameters(os.path.join(base_path, 'Values of parameters for drone routing.xlsx'), demand_category)
 
         # Estrai e converte i parametri
-        customer_weights = [float(weight) for weight in drone_params[f'demand_{demand_category}']]
-        truck_speed = 40  # km/h fisso per il truck
-        service_time_van = float(drone_params['service time for van'])  # secondi per ogni cliente
+        customer_weights = drone_params[f'demand_{demand_category}']
+        truck_speed = 40  # km/h fixed for the truck
+        service_time_van = float(drone_params['service time for van'])  # seconds for each customer
 
-        drone_endurance = float(drone_params['flight time_large baterry']) / 3600  # Converti in ore
+        drone_endurance = float(drone_params['flight time_large baterry']) / 3600  # Convert to hours
         drone_capacity = float(drone_params['drone capacity'])  # kg
-        launch_time = float(drone_params['launch time_100 m'])  # secondi
-        landing_time = float(drone_params['landing time_100m'])  # secondi
-        preparation_time = float(drone_params['preparation time before each launch'])  # secondi
-        service_time_drone = float(drone_params['service time for drones'])  # secondi per ogni cliente
+        launch_time = float(drone_params['launch time_100 m'])  # seconds
+        landing_time = float(drone_params['landing time_100m'])  # seconds
+        preparation_time = float(drone_params['preparation time before each launch'])  # seconds
+        service_time_drone = float(drone_params['service time for drones'])  # seconds for each customer
 
         # Trova i file corrispondenti al numero di clienti
         truck_file = f"Van_Urban_{num_clients}.xlsx"

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import ast
 
 def load_distances(file_path):
     df = pd.read_excel(file_path, header=None)
@@ -20,35 +21,40 @@ def load_distances(file_path):
 def parse_demand(demand_str):
     return [int(x) for x in demand_str.strip('[] kg').split(',')]
 
+def strip_units(value):
+    if isinstance(value, str):
+        return value.split()[0]  # Take only the numeric part
+    return value
+
 def load_parameters(file_path, demand_category):
     df = pd.read_excel(file_path)
 
-    # Sostituisci i valori NaN nella colonna 'Description' con l'ultimo valore valido
-    df['Description'].fillna(method='ffill', inplace=True)
+    # Replace NaN values in the 'Description' column with the last valid value
+    df['Description'] = df['Description'].ffill()
 
     parameters = {}
     demand_values = []
 
-    # Estrai i parametri dal DataFrame
+    # Extract parameters from the DataFrame
     for _, row in df.iterrows():
         description = row['Description'].strip()
         category = row['Category'].strip() if pd.notna(row['Category']) else None
-        value = row['Values'].strip() if isinstance(row['Values'], str) else row['Values']
+        value = row['Values']
 
-        # Gestione dei valori di domanda in base alla categoria selezionata
+        # Handle demand values based on the selected category
         if description == 'demand':
             if category == demand_category:
-                demand_values = value
+                # Convert the string to a list of float
+                demand_values = [float(x) for x in ast.literal_eval(strip_units(value))]
         else:
             param_key = f"{description}_{category}" if category else description
-            parameters[param_key] = value
+            parameters[param_key] = strip_units(value)
 
-    # Aggiungi i valori di domanda ai parametri
+    # Add demand values to parameters
     if demand_values:
         parameters[f'demand_{demand_category}'] = demand_values
     else:
         raise ValueError(f"No demand values found for category: {demand_category}")
-
 
     return parameters
 
