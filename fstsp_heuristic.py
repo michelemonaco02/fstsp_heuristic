@@ -51,7 +51,7 @@ def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,d
 def is_UAV_associated(subroute_with_flag):
     return subroute_with_flag[1] != -1
 
-def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,truck_speed,savings,e):
+def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,truck_speed,savings,e,best_insertion):
     #Find a, the first node in the truck’s subroute.
     #Find b, the last node in the truck’s subroute.
 
@@ -86,14 +86,14 @@ def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,
 
 
 
-    return best_insertion
+    return best_insertion,maxSavings,servedByUAV
 
-def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distances_uav,drone_speed,e,savings,s_l,s_r):
+def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distances_uav,drone_speed,e,savings,s_l,s_r,best_insertion):
     # This truck subroute is not associated with a UAV visit
     # Try to use the UAV to visit j
 
     subroute = subroute_with_flag[0]
-    best_insertion = None
+
 
     # Ensure savings is a number
     if savings is None:
@@ -126,7 +126,7 @@ def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distanc
                         maxSavings = savings - cost
 
    
-    return best_insertion
+    return best_insertion,maxSavings,servedByUAV
 
 
 
@@ -200,6 +200,9 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,
         truckRoute.remove(j)
         index_i = truckRoute.index(i)
         truckRoute.insert(index_i + 1, j)
+    
+
+    print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
 
     
     #come aggiornare t?
@@ -221,6 +224,7 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
     while True:
         #dichiaro la variabile servedByUAV
         servedByUAV = False
+        best_insertion = None
         
         for j in C_prime:
             #trovo il risparmio che ottengo togliendo j dalla truckRoute
@@ -232,9 +236,9 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
             for subroute_with_flag in truckSubRoutes:
                 if is_UAV_associated(subroute_with_flag):
                     #passo maxSavings e servedByUAV a calcCostTruck, che eventualmente aggiornerà il valore
-                    best_insertion = calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,truck_speed,savings,e)
+                    best_insertion,maxSavings,servedByUAV = calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,truck_speed,savings,e,best_insertion)
                 else:
-                    best_insertion = calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distances_uav,drone_speed,e,savings,s_l,s_r)
+                    best_insertion,maxSavings,servedByUAV = calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distances_uav,drone_speed,e,savings,s_l,s_r,best_insertion)
 
         #se ho trovato miglioramenti, faccio l'update
         if maxSavings > 0:
