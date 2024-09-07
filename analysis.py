@@ -8,8 +8,14 @@ from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
 from map_visualizer import visualize_fstsp, generate_coordinates
+from typing import List
 
-def analyze_drone_speed_impact_on_fstsp(plotting=False, drone_speeds=[32]):
+def analyze_drone_speed_impact_on_fstsp(plotting: bool, drone_speeds: List[float]) -> None:
+    """
+    Analyze the impact of drone speed on the Flying Sidekick Traveling Salesman Problem (FSTSP).
+    Loads parameters, solves initial TSP, executes FSTSP heuristic for each drone speed,
+    and optionally visualizes results.
+    """
     base_path = 'Data_and_data-description/TELIKA DATA/'
     
     num_clients = 10  # Fixed number of clients
