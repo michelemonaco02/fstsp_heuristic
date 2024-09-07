@@ -56,8 +56,8 @@ def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,
     #Find b, the last node in the truck’s subroute.
 
     subroute = subroute_with_flag[0]
-    a = subroute_with_flag[0]
-    b = subroute_with_flag[-1]
+    a = subroute[0]
+    b = subroute[-1]
 
     #for all (adjacent i and k in subroute) do
     for idx in range(len(subroute) - 1) :
@@ -77,6 +77,7 @@ def calcCostTruck(j,t,subroute_with_flag,maxSavings,servedByUAV,distances_truck,
 
             if cost < savings:
                 # Can the UAV assigned to this subroute still feasibly fly?
+
                 if (t[b] - t[a] + cost) <= e:
                     if (savings - cost ) > maxSavings:
                         #save this change
