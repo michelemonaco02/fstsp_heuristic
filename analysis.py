@@ -2,7 +2,16 @@ import os
 import pandas as pd
 from data_loader import load_distances, load_parameters
 from fstsp_heuristic import fstsp_heuristic
-from solveTSP import solveTSP
+
+# Funzione per convertire i parametri in float, rimuovendo unità come 'sec' e 'kg'
+def convert_to_float(value):
+    if isinstance(value, str):
+        return float(value.replace('kg', '').replace('sec', '').replace(' ', '').replace('[','').replace(']',''))
+    return float(value)
+
+# Funzione per gestire la conversione dei pesi dei clienti
+def parse_demand(demand_str):
+    return [convert_to_float(x) for x in demand_str.strip('[] kg').split(',')]
 
 def analyze_drone_speed_impact_on_fstsp():
     # Lista di file da analizzare (solo scenari urbani)
@@ -30,16 +39,16 @@ def analyze_drone_speed_impact_on_fstsp():
         drone_params = load_parameters(os.path.join(base_path, 'Values of parameters for drone routing.xlsx'), demand_category)
 
         # Estrai e converte i parametri
-        customer_weights = [float(weight) for weight in drone_params[f'demand_{demand_category}']]
+        customer_weights = parse_demand(drone_params[f'demand_{demand_category}'])
         truck_speed = 40  # km/h fisso per il truck
-        service_time_van = float(drone_params['service time for van'])  # secondi per ogni cliente
+        service_time_van = convert_to_float(drone_params['service time for van'])  # secondi per ogni cliente
 
-        drone_endurance = float(drone_params['flight time_large baterry']) / 3600  # Converti in ore
-        drone_capacity = float(drone_params['drone capacity'])  # kg
-        launch_time = float(drone_params['launch time_100 m'])  # secondi
-        landing_time = float(drone_params['landing time_100m'])  # secondi
-        preparation_time = float(drone_params['preparation time before each launch'])  # secondi
-        service_time_drone = float(drone_params['service time for drones'])  # secondi per ogni cliente
+        drone_endurance = convert_to_float(drone_params['flight time_large baterry']) / 3600  # Converti in ore
+        drone_capacity = convert_to_float(drone_params['drone capacity'])  # kg
+        launch_time = convert_to_float(drone_params['launch time_100 m'])  # secondi
+        landing_time = convert_to_float(drone_params['landing time_100m'])  # secondi
+        preparation_time = convert_to_float(drone_params['preparation time before each launch'])  # secondi
+        service_time_drone = convert_to_float(drone_params['service time for drones'])  # secondi per ogni cliente
 
         # Trova i file corrispondenti al numero di clienti
         truck_file = f"Van_Urban_{num_clients}.xlsx"
@@ -50,8 +59,7 @@ def analyze_drone_speed_impact_on_fstsp():
             distances_truck = load_distances(os.path.join(base_path, truck_file))
             distances_uav = load_distances(os.path.join(base_path, uav_file))
 
-            # Risolvi il problema TSP con una euristica standard (es: nearest neighbor)
-            truck_route, truck_times = solveTSP(num_clients, distances_truck, heuristic='nearest_neighbor')
+
             
             for drone_speed in drone_speeds:
                 # Esegui l'algoritmo FSTSP con la velocità del drone variabile
