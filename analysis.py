@@ -45,16 +45,7 @@ def analyze_vdrpmdpc_simulation():
         # Carica i parametri del drone e del van
         drone_params = load_parameters(os.path.join(base_path, 'Values of parameters for drone routing.xlsx'), demand_category)
 
-        # Estrai e converte i parametri
-        customer_weights = parse_demand(drone_params[f'demand_{demand_category}'])
-        service_time_van = convert_to_float(drone_params['service time for van'])  # secondi per ogni cliente
-
         drone_endurance = convert_to_float(drone_params['flight time_large baterry']) / 3600  # Converti in ore
-        drone_capacity = convert_to_float(drone_params['drone capacity'])  # kg
-        launch_time = convert_to_float(drone_params['launch time_100 m']) / 3600  # Converti in ore
-        landing_time = convert_to_float(drone_params['landing time_100m']) / 3600  # Converti in ore
-        preparation_time = convert_to_float(drone_params['preparation time before each launch'])  # secondi
-        service_time_drone = convert_to_float(drone_params['service time for drones'])  # secondi per ogni cliente
 
         # Trova i file corrispondenti al numero di clienti
         if num_clients == 20:

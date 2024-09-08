@@ -3,7 +3,7 @@ from solveTSP import solveTSP
 import random
 
 # Numero di clienti
-n_customers = 20
+n_customers = 5
 
 # Lista dei nodi, C, che rappresenta i clienti (dal nodo 1 a n_customers)
 C = [i for i in range(1, n_customers + 1)]

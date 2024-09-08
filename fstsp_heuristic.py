@@ -260,6 +260,7 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
     [truckRoute,t] = solveTSP(C,distances_truck,truck_speed)
     #il secondo parametro in ogni subRoute è -1 se alla subRoute non è associata la consegna con uav
     #altrimenti nel secondo parametro c'è il nodo che viene servito da uav nella subroute
+    len_in = len(truckRoute)
     truckSubRoutes = [(copy.deepcopy(truckRoute),-1)]
     maxSavings = 0
     servedByUAV = False
@@ -277,7 +278,7 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
                     servedByUAV,best_insertion,maxSavings = calcCostUAV(j,t,subroute_with_flag,distances_uav,uav_speed,e,truckRoute,savings,s_l,s_r,maxSavings,servedByUAV,best_insertion)
         
 
-        if maxSavings > 0:
+        if maxSavings > 0.00000001:
             #print(f"[MAIN]: Trovata best insertion {best_insertion} con servedByUAV {servedByUAV} e maxSavings {maxSavings} \n")
             performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,t,distances_truck,distances_uav,truck_speed,uav_speed)
             maxSavings = 0
@@ -285,5 +286,7 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
             best_insertion = None
         else:
             break
-
+    
+    len_fin = len(truckRoute)
+    print(f"Lunghezza iniziale : {len_in}, lunghezza finale : {len_fin}")
     return truckRoute,t
