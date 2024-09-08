@@ -1,5 +1,16 @@
 from solveTSP import solveTSP
 import copy
+from time import sleep
+
+def print_arrival_times_in_order(t):
+    # Ordina il dizionario per tempo di arrivo (i valori del dizionario)
+    sorted_arrivals = sorted(t.items(), key=lambda x: x[1])
+
+    # Stampa i nodi in ordine di arrivo con il rispettivo tempo
+    print("Tempi di arrivo ordinati:")
+    for node, arrival_time in sorted_arrivals:
+        print(f"Nodo {node}: {arrival_time:.2f} ore")
+
 
 def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r):
     
@@ -46,6 +57,9 @@ def calcCostTruck(j,t,subroute_with_flag,distances_truck,truck_speed,savings,e,m
         i = subroute[index]
         k = subroute[index + 1]
 
+           # Aggiungi controllo per evitare inserzioni con i == j == k
+        if i == j or j == k or i == k:
+            continue  # Salta questa iterazione se i, j, o k non sono distinti
         tau_i_j = distances_truck[i][j] / truck_speed
         tau_j_k = distances_truck[j][k] / truck_speed
         tau_i_k = distances_truck[i][k] / truck_speed
@@ -71,6 +85,10 @@ def calcCostUAV(j,t,subroute_with_flag,distances_uav,uav_speed,e,truckRoute,savi
         i = subroute[i_index]
         for k_index in range(i_index + 1,len(subroute)):
             k = subroute[k_index]
+
+                    # Aggiungi controllo per evitare inserzioni con i == j == k
+            if i == j or j == k or i == k:
+                continue  # Salta questa iterazione se i, j, o k non sono distinti
 
             tau_i_j_uav = distances_uav[i][j] / uav_speed
             tau_j_k_uav = distances_uav[j][k] / uav_speed
@@ -200,7 +218,7 @@ def time_update(truckSubRoutes,t:dict,distances_truck, distances_uav, truck_spee
             #se non sono nell'ultima posizione
             if index != len(subroute) - 1:
                 
-                tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                tau_i_j = distances_truck[subroute[index-1]][subroute[index]] / truck_speed
                 t[subroute[index]] = t[subroute[index-1]] + tau_i_j
             
             else:
@@ -216,11 +234,11 @@ def time_update(truckSubRoutes,t:dict,distances_truck, distances_uav, truck_spee
                     time_uav_arrive = t[a] + tau_a_j_prime_uav + tau_j_prime_b_uav
 
                     #eventualmente,in b il truck aspetta per il drone
-                    tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                    tau_i_j = distances_truck[subroute[index-1]][subroute[index]] / truck_speed
                     t[subroute[index]] = max(time_uav_arrive,t[subroute[index-1]] + tau_i_j)
 
                 else:
-                    tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                    tau_i_j = distances_truck[subroute[index-1]][subroute[index]] / truck_speed
                     t[subroute[index]] = t[subroute[index-1]] + tau_i_j
 
 
@@ -249,7 +267,9 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
 
         if maxSavings > 0:
+            print(f"[MAIN]: Ho trovato un maxSavings: {maxSavings} con servedByUAV : {servedByUAV} e best_insertion : {best_insertion}")
             performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,t,distances_truck,distances_uav,truck_speed,uav_speed)
+            print_arrival_times_in_order(t)
             maxSavings = 0
         else:
             break
