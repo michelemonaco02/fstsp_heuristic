@@ -2,7 +2,7 @@ from solveTSP import solveTSP
 import copy
 from time import sleep
 
-""""
+
 def print_arrival_times_in_order(t):
     # Ordina il dizionario per tempo di arrivo (i valori del dizionario)
     sorted_arrivals = sorted(t.items(), key=lambda x: x[1])
@@ -11,7 +11,7 @@ def print_arrival_times_in_order(t):
     print("Tempi di arrivo ordinati:")
     for node, arrival_time in sorted_arrivals:
         print(f"Nodo {node}: {arrival_time:.2f} ore")
-"""
+
 
 def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r):
     
@@ -131,9 +131,8 @@ def performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,
                 subroute_with_flag[0].remove(j)
                 break
 
-         #supponiamo di aver inserito j in una subroute S con nodi di lancio e retrieve i e k. Spezzo la subroute per aggiornare
+        #supponiamo di aver inserito j in una subroute S con nodi di lancio e retrieve i e k. Spezzo la subroute per aggiornare
         #per prima cosa, trovo la subroute con i e k, poi la elimino e aggiorno
-        #NON CREDO SIA GIUSTO. Inoltre, voglio che l'aggiornamento dei truckSubRoutes sia in modo tale che le subroutes siano in ordine
 
 
         for subroute in truckSubRoutes:
@@ -181,10 +180,13 @@ def performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,
         truckRoute.remove(j)
 
         for subroute in truckSubRoutes:
+            #dovrei considerare il caso in cui j si trova agli estremi della subroute?
+            #tuttavia, essendo che j appartiene a C_prime, non può appartenere a un estremo di una subroute
             if j in subroute[0]:
                 subroute[0].remove(j)
                 break
         
+        #inserisco j nella sobroute adeguata
         for subroute in truckSubRoutes:
             if i in subroute[0] and k in subroute[0]:
                 index_i = subroute[0].index(i)
@@ -192,12 +194,19 @@ def performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,
                 subroute[0].insert(index_i + 1, j)
                 break
         
+        #inserisco j nella truckRoute
         index_i = truckRoute.index(i)
         truckRoute.insert(index_i + 1, j)
 
     
     #update dei tempi
     time_update(truckSubRoutes,t,distances_truck,distances_uav,truck_speed,uav_speed)
+
+    print(f"[Performe Update]: Effettuato update con servedByUAV: {servedByUAV}, best_insertion: {best_insertion}.\n"
+      f"truckSubRoutes aggiornata: {truckSubRoutes}.\n"
+      f"truckRoute aggiornata: {truckRoute}.")
+
+    print_arrival_times_in_order(t)
 
 
 
@@ -249,10 +258,13 @@ def time_update(truckSubRoutes,t:dict,distances_truck, distances_uav, truck_spee
 def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_speed,s_l,s_r):
     
     [truckRoute,t] = solveTSP(C,distances_truck,truck_speed)
+    #il secondo parametro in ogni subRoute è -1 se alla subRoute non è associata la consegna con uav
+    #altrimenti nel secondo parametro c'è il nodo che viene servito da uav nella subroute
     truckSubRoutes = [(copy.deepcopy(truckRoute),-1)]
     maxSavings = 0
 
     while True:
+        #ad ogni iterazione, inizializzo servedByUAV e best_insertion
         servedByUAV = False
         best_insertion = None
         
@@ -267,12 +279,10 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
 
         if maxSavings > 0:
-
+            print(f"[MAIN]: Trovata best insertion {best_insertion} con servedByUAV {servedByUAV} e maxSavings {maxSavings} \n")
             performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,t,distances_truck,distances_uav,truck_speed,uav_speed)
-            #print_arrival_times_in_order(t)
             maxSavings = 0
         else:
             break
 
-    
     return truckRoute,t
