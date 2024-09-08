@@ -134,7 +134,7 @@ def calcCostUAV(j,t,subroute_with_flag,truckRoute,maxSavings,servedByUAV,distanc
 
 
 
-def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:list,t,maxSavings,s_l,savings):
+def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:list,t,distances_truck, distances_uav, truck_speed, drone_speed):
 
     i = best_insertion[0]
     j = best_insertion[1]
@@ -147,8 +147,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
         
         # update delle truckSubRoutes
         #elimino j dalla subroute in cui si trovava
-        #mi salvo index_subroute_in
-        index_subroute_in = None
+
         for subroute_with_flag in truckSubRoutes:
             if j in subroute_with_flag[0]:
                 subroute_with_flag[0].remove(j)
@@ -165,7 +164,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
                 # Salvo l'indice della subroute in truckSubRoutes
                 
                 index_subroute = truckSubRoutes.index(subroute)
-                print(f"index subroute before: {index_subroute}")
+
 
                 index_i = subroute[0].index(i)
                 index_k = subroute[0].index(k)
@@ -173,7 +172,7 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
                 subroute_before_i = subroute[0][:index_i + 1]  # Prima parte fino a i incluso
                 subroute_i_k = subroute[0][index_i:index_k + 1]  # Parte tra i e k inclusi
                 subroute_after_k = subroute[0][index_k:]  # Parte dopo k
-                print(f"[PERFORME UPDATE]: Subroute before i: {subroute_before_i},subroute_i_k : {subroute_i_k},subroute_after_k:{subroute_after_k}...")
+
                 
 
                 # Rimuovo la subroute originale
@@ -201,17 +200,11 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
             if node in C_prime:
                 C_prime.remove(node)
         
-        print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
-
-        print(f"index subroute: {index_subroute}")
-        for index in range(index_subroute,len(truckSubRoutes)):
-            for i in range(1,len(truckSubRoutes[index][0])):
-                t[truckSubRoutes[index][0][i]] -= maxSavings
-
-        print(f"[PERFORME UPDATE]: t after update:")
-        utilities.print_times_in_order(t)
 
     else:
+
+        truckRoute.remove(j)
+
         for subroute in truckSubRoutes:
             if j in subroute[0]:
                 subroute[0].remove(j)
@@ -224,20 +217,19 @@ def performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes:
                 subroute[0].insert(index_i + 1, j)
                 break
         
-        truckRoute.remove(j)
         index_i = truckRoute.index(i)
         truckRoute.insert(index_i + 1, j)
     
 
-        print(f"[PerformeUpdate]: TruckSubRoutes con update: {truckSubRoutes}...")
+
 
     
     #come aggiornare t?
     #IDEA: Per i nodi successivi alla subroute modificata, t[node] -= maxSavings, quindi devo gestire solo l'aggiornamento nella subroute modificata.
     #Problema: bisogna tenere conto di eventuali attese del truck per l'UAV
+    utilities.time_update(truckSubRoutes,t,distances_truck, distances_uav, truck_speed, drone_speed)
 
-
-            
+    utilities.stampa_dizionario_ordinato(t)
 
 
 
@@ -245,10 +237,9 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
     
     #t deve essere un dizionario
     truckRoute, t = solveTSP(len(C), distances_truck,truck_speed)
-    print(f"[MAIN]: Truckroute after TSP: {truckRoute}")
-    print(f"[MAIN]: t after TSP: {t}")
     truckSubRoutes = [(copy.deepcopy(truckRoute),-1)]
     maxSavings = 0
+
 
     while True:
         #dichiaro la variabile servedByUAV
@@ -271,15 +262,16 @@ def fstsp_heuristic(num_clients, C, C_prime, distances_truck, distances_uav, tru
 
         #se ho trovato miglioramenti, faccio l'update
         if maxSavings > 0:
-            print(f"[MAIN]: Ho trovato un miglioramento {best_insertion} con servedByUav {servedByUAV}...")
-            performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,t,maxSavings,s_l,savings)
+
+            performeUpdate(best_insertion,servedByUAV,C_prime,truckRoute,truckSubRoutes,t,distances_truck, distances_uav, truck_speed, drone_speed)
             maxSavings = 0
 
         #non ci sono miglioramenti, interrompo l'algoritmo
         else:
             break
     print(f"[MAIN]: Truckroute: {truckRoute}")
-
     
+
+    return t[0]
 
 

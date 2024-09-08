@@ -9,15 +9,56 @@ def find_subroute_for_j(j,truckSubRoutes):
         if j in subroute_with_flag[0]:
             return subroute_with_flag
 
-def updateArrivalTimesServedByUAV(truckSubRoutes,t,maxSavings,index_subroute_before_i,
-                                    index_subroute_i_k,index_subroute_after_k,index_subroute_in,index_subroute_fin,s_l,savings):
-
-    pass
-
-def print_times_in_order(t):
-    # Ordina il dizionario t in base ai valori (tempi di arrivo)
-    sorted_times = sorted(t.items(), key=lambda item: item[1])
+def time_update(truckSubRoutes,t:dict,distances_truck, distances_uav, truck_speed, drone_speed):
     
-    # Stampa i nodi in ordine di arrivo
-    for node, time in sorted_times:
-        print(f"Node {node}: Time {time}")
+    #initialize t = 0 for every node
+    for key in t.keys():
+        t[key] = 0
+
+    for subroute_with_flag in truckSubRoutes:
+        subroute = subroute_with_flag[0]
+
+        a = subroute[0]
+        b = subroute[-1]
+
+
+        for index in range(1,len(subroute)):
+            #se non sono nell'ultima posizione
+            if index != len(subroute) - 1:
+                
+                tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                t[subroute[index]] = t[subroute[index-1]] + tau_i_j
+            
+            else:
+                #sono nell'ultima posizione, devo coordinare col drone (se c'è)
+                if subroute_with_flag[1] != -1:
+                    #trovo j'
+                    j_prime = subroute_with_flag[1]
+                    #trovo tau_a_j_prime_uav, tau_j_prime_b_uav
+                    tau_a_j_prime_uav = distances_uav[a][j_prime] / drone_speed
+                    tau_j_prime_b_uav = distances_uav[j_prime][b] / drone_speed
+
+                    #trovo il tempo di arrivo dell'uav a b
+                    time_uav_arrive = t[a] + tau_a_j_prime_uav + tau_j_prime_b_uav
+
+                    #eventualmente,in b il truck aspetta per il drone
+                    tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                    t[subroute[index]] = max(time_uav_arrive,t[subroute[index-1]] + tau_i_j)
+
+                else:
+                    tau_i_j = distances_truck[subroute[index-1]][index] / truck_speed
+                    t[subroute[index]] = t[subroute[index-1]] + tau_i_j
+
+
+    return
+
+def stampa_dizionario_ordinato(tempi_arrivo):
+    # Filtra i valori diversi da 0
+    tempi_arrivo_filtrato = {nodo: tempo for nodo, tempo in tempi_arrivo.items() if tempo != 0}
+
+    # Ordina il dizionario per i tempi di arrivo (valori)
+    tempi_arrivo_ordinato = dict(sorted(tempi_arrivo_filtrato.items(), key=lambda item: item[1]))
+
+    # Stampa il dizionario ordinato
+    for nodo, tempo in tempi_arrivo_ordinato.items():
+        print(f'{nodo}: {tempo}')

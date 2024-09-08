@@ -78,8 +78,8 @@ def analyze_drone_speed_impact_on_fstsp():
             distances_uav,
             truck_speed,
             drone_speed,
-            s_l,
-            s_r,
+            0,
+            0,
             e
         )
 
