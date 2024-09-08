@@ -2,6 +2,16 @@ import random
 from fstsp_heuristic import fstsp_heuristic
 from solveTSP import solveTSP
 
+# Funzione per generare una matrice delle distanze simmetriche
+def generate_symmetric_matrix(n, min_val, max_val):
+    matrix = [[0 if i == j else random.randint(min_val, max_val) for j in range(n)] for i in range(n)]
+    
+    # Rendiamo la matrice simmetrica
+    for i in range(n):
+        for j in range(i + 1, n):
+            matrix[j][i] = matrix[i][j]
+    return matrix
+
 # Numero di clienti
 n_customers = 5
 
@@ -22,11 +32,11 @@ e = 0.5  # tempo massimo volo drone in ore (e.g., 30 minuti)
 s_l = 0.1  # in ore
 s_r = 0.1  # in ore
 
-# Generiamo una matrice delle distanze casuale per il truck (distanze in km)
-distances_truck = [[0 if i == j else random.randint(10, 50) for j in range(n_customers + 1)] for i in range(n_customers + 1)]
+# Genera una matrice delle distanze simmetriche per il truck (distanze in km)
+distances_truck = generate_symmetric_matrix(n_customers + 1, 10, 50)
 
-# Generiamo una matrice delle distanze casuale per l'UAV (distanze in km)
-distances_uav = [[0 if i == j else random.randint(5, 30) for j in range(n_customers + 1)] for i in range(n_customers + 1)]
+# Genera una matrice delle distanze simmetriche per l'UAV (distanze in km)
+distances_uav = generate_symmetric_matrix(n_customers + 1, 5, 30)
 
 # Stampa le matrici di distanze generate
 print("Matrice delle distanze del truck (km):")
@@ -49,7 +59,7 @@ for node, arrival_time in t_tsp.items():
     print(f"Nodo {node}: {arrival_time:.2f} ore")
 
 # Chiama l'euristica FSTSP
-truck_route_fstsp, t_fstsp = fstsp_heuristic(C, C_prime, distances_truck, truck_speed, e, distances_uav, uav_speed, s_l, s_r)
+truck_route_fstsp, t_fstsp = fstsp_heuristic(C, C_prime, distances_truck, truck_speed, e, distances_uav, uav_speed, 0, 0)
 
 # Stampa i risultati dell'heuristica FSTSP
 print("\nPercorso del truck con fstsp_heuristic:")

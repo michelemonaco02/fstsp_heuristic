@@ -67,9 +67,8 @@ def calcCostTruck(j,t,subroute_with_flag,distances_truck,truck_speed,savings,e,m
         cost = tau_i_j + tau_j_k - tau_i_k
         
         if cost < savings:
-
             if t[b] - t[a] < e:
-                if savings - cost < maxSavings:
+                if savings - cost > maxSavings:
                     servedByUAV = False
                     best_insertion = (i,j,k)
                     maxSavings = savings - cost
@@ -258,7 +257,7 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
         for j in C_prime:
             savings = calcSavings(j,t,truckRoute,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r)
-
+            print(f"[FSTSP HEURISTIC]: Savings calcolata per j = {j}: {savings}")
             for subroute_with_flag in truckSubRoutes:
                 if is_UAV_associated(subroute_with_flag):
                     servedByUAV,best_insertion,maxSavings = calcCostTruck(j,t,subroute_with_flag,distances_truck,truck_speed,savings,e,maxSavings,servedByUAV,best_insertion)
