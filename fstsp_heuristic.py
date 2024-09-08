@@ -2,6 +2,7 @@ from solveTSP import solveTSP
 import copy
 from time import sleep
 
+""""
 def print_arrival_times_in_order(t):
     # Ordina il dizionario per tempo di arrivo (i valori del dizionario)
     sorted_arrivals = sorted(t.items(), key=lambda x: x[1])
@@ -10,7 +11,7 @@ def print_arrival_times_in_order(t):
     print("Tempi di arrivo ordinati:")
     for node, arrival_time in sorted_arrivals:
         print(f"Nodo {node}: {arrival_time:.2f} ore")
-
+"""
 
 def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r):
     
@@ -257,7 +258,7 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
         for j in C_prime:
             savings = calcSavings(j,t,truckRoute,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r)
-            print(f"[FSTSP HEURISTIC]: Savings calcolata per j = {j}: {savings}")
+
             for subroute_with_flag in truckSubRoutes:
                 if is_UAV_associated(subroute_with_flag):
                     servedByUAV,best_insertion,maxSavings = calcCostTruck(j,t,subroute_with_flag,distances_truck,truck_speed,savings,e,maxSavings,servedByUAV,best_insertion)
@@ -266,9 +267,9 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
 
         if maxSavings > 0:
-            print(f"[MAIN]: Ho trovato un maxSavings: {maxSavings} con servedByUAV : {servedByUAV} e best_insertion : {best_insertion}")
+
             performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,t,distances_truck,distances_uav,truck_speed,uav_speed)
-            print_arrival_times_in_order(t)
+            #print_arrival_times_in_order(t)
             maxSavings = 0
         else:
             break
