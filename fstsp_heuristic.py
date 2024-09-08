@@ -202,11 +202,11 @@ def performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,
     #update dei tempi
     time_update(truckSubRoutes,t,distances_truck,distances_uav,truck_speed,uav_speed)
 
-    print(f"[Performe Update]: Effettuato update con servedByUAV: {servedByUAV}, best_insertion: {best_insertion}.\n"
-      f"truckSubRoutes aggiornata: {truckSubRoutes}.\n"
-      f"truckRoute aggiornata: {truckRoute}.")
+   # print(f"[Performe Update]: Effettuato update con servedByUAV: {servedByUAV}, best_insertion: {best_insertion}.\n"
+     # f"truckSubRoutes aggiornata: {truckSubRoutes}.\n"
+      #f"truckRoute aggiornata: {truckRoute}.")
 
-    print_arrival_times_in_order(t)
+   # print_arrival_times_in_order(t)
 
 
 
@@ -262,11 +262,10 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
     #altrimenti nel secondo parametro c'è il nodo che viene servito da uav nella subroute
     truckSubRoutes = [(copy.deepcopy(truckRoute),-1)]
     maxSavings = 0
+    servedByUAV = False
+    best_insertion = None
 
     while True:
-        #ad ogni iterazione, inizializzo servedByUAV e best_insertion
-        servedByUAV = False
-        best_insertion = None
         
         for j in C_prime:
             savings = calcSavings(j,t,truckRoute,truckSubRoutes,distances_truck,truck_speed,distances_uav,uav_speed,s_r)
@@ -279,9 +278,11 @@ def fstsp_heuristic(C,C_prime,distances_truck,truck_speed,e,distances_uav,uav_sp
         
 
         if maxSavings > 0:
-            print(f"[MAIN]: Trovata best insertion {best_insertion} con servedByUAV {servedByUAV} e maxSavings {maxSavings} \n")
+            #print(f"[MAIN]: Trovata best insertion {best_insertion} con servedByUAV {servedByUAV} e maxSavings {maxSavings} \n")
             performeUpdate(best_insertion,servedByUAV,truckRoute,truckSubRoutes,C_prime,t,distances_truck,distances_uav,truck_speed,uav_speed)
             maxSavings = 0
+            servedByUAV = False
+            best_insertion = None
         else:
             break
 

@@ -15,18 +15,14 @@ def parse_demand(demand_str):
     return [convert_to_float(x) for x in demand_str.strip('[] kg').split(',')]
 
 def analyze_vdrpmdpc_simulation():
-    # Lista di file da analizzare, escludendo quelli con 100 clienti
+    # Lista di file da analizzare, escludendo quelli con 100 clienti e scenari semi-urbani per 40 e 60 clienti
     files = [
-        "Van_Semi-Urban_60.xlsx",
-        "Van_Semi-Urban_40.xlsx",
-        "Van_Semi-Urban_20.xlsx",
         "Van_Urban_60.xlsx",
         "Van_Urban_40.xlsx",
-        "Drone_Semi-Urban_60.xlsx",
-        "Drone_Semi-Urban_40.xlsx",
-        "Drone_Semi-Urban_20.xlsx",
+        "Van_Semi-Urban_20.xlsx",
         "Drone_Urban_60.xlsx",
-        "Drone_Urban_40.xlsx"
+        "Drone_Urban_40.xlsx",
+        "Drone_Semi-Urban_20.xlsx"
     ]
 
     base_path = 'Data_and_data-description/TELIKA DATA/'
@@ -64,11 +60,9 @@ def analyze_vdrpmdpc_simulation():
         if num_clients == 20:
             van_file = f"Van_Semi-Urban_{num_clients}.xlsx"
             uav_file = f"Drone_Semi-Urban_{num_clients}.xlsx"
-            scenario_type = "Semi-Urban"
         else:
-            van_file = f"Van_Urban_{num_clients}.xlsx" if f"Van_Urban_{num_clients}.xlsx" in files else f"Van_Semi-Urban_{num_clients}.xlsx"
-            uav_file = f"Drone_Urban_{num_clients}.xlsx" if f"Drone_Urban_{num_clients}.xlsx" in files else f"Drone_Semi-Urban_{num_clients}.xlsx"
-            scenario_type = "Urban" if "Urban" in van_file else "Semi-Urban"
+            van_file = f"Van_Urban_{num_clients}.xlsx"
+            uav_file = f"Drone_Urban_{num_clients}.xlsx"
 
         if van_file in files and uav_file in files:
             # Carica le distanze
@@ -78,7 +72,7 @@ def analyze_vdrpmdpc_simulation():
             # Per ogni velocità del drone
             for drone_speed in drone_speeds:
                 # Esegui l'algoritmo FSTSP con la velocità variabile
-                print(f"\nTesting with {num_clients} clients, scenario: {scenario_type}, truck speed: {truck_speed} km/h and drone speed: {drone_speed} km/h")
+                print(f"\nTesting with {num_clients} clients, truck speed: {truck_speed} km/h and drone speed: {drone_speed} km/h")
                 
                 # Parametri per la funzione fstsp_heuristic
                 s_l = 0  # Impostati a 0 per evitare problemi di aggiornamento tempi
@@ -103,21 +97,29 @@ def analyze_vdrpmdpc_simulation():
                 fstsp_delivery_time = t_fstsp[0]  # Tempo di ritorno al nodo 0 (depot)
                 print(f"Tempo di consegna con FSTSP (con UAV): {fstsp_delivery_time:.2f} ore")
 
+                # Calcola la percentuale di tempo risparmiato
+                time_savings_percent = ((tsp_delivery_time - fstsp_delivery_time) / tsp_delivery_time) * 100
+
                 # Salva i risultati in una lista
                 results.append({
                     'num_clients': num_clients,
-                    'scenario': scenario_type,
                     'drone_speed': drone_speed,
                     'tsp_delivery_time': tsp_delivery_time,
-                    'fstsp_delivery_time': fstsp_delivery_time
+                    'fstsp_delivery_time': fstsp_delivery_time,
+                    'time_savings_percent': time_savings_percent
                 })
 
-                print(f"Finished testing with drone speed: {drone_speed} km/h in scenario: {scenario_type}\n")
+                print(f"Finished testing with drone speed: {drone_speed} km/h\n")
 
     # Stampa finale dei risultati
     print("\n--- Risultati finali ---")
     df_results = pd.DataFrame(results)
     print(df_results)
+
+    # Stampa la tabella con il tempo risparmiato
+    print("\n--- Percentuale di tempo risparmiato rispetto a TSP ---")
+    df_savings = df_results[['num_clients', 'drone_speed', 'time_savings_percent']]
+    print(df_savings)
 
 if __name__ == "__main__":
     analyze_vdrpmdpc_simulation()
