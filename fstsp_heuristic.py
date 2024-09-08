@@ -45,7 +45,7 @@ def calcSavings(j,t,truckRoute:list,truckSubRoutes,distances_truck,truck_speed,d
     return savings
 
 def is_UAV_associated(subroute_with_flag):
-    pass
+    return subroute_with_flag[1] != -1
 
 def calcCostTruck(j,t,subroute_with_flag,distances_truck,truck_speed,savings,e,maxSavings,servedByUAV,best_insertion):
     subroute = subroute_with_flag[0]
